@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptop Price Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-glow:focus {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .currency-flag {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 48'%3E%3Crect width='72' height='48' fill='%23ffb700'/%3E%3Crect x='36' width='36' height='48' fill='%23a2001d'/%3E%3Crect x='2' y='2' width='68' height='44' fill='none' stroke='%23000' stroke-width='2'/%3E%3Crect x='36' y='2' width='34' height='44' fill='none' stroke='%23ffb700' stroke-width='2'/%3E%3Cpath d='M56 24c0-4-3-7-7-7v14c4 0 7-3 7-7z' fill='%23ffb700' stroke='%23ffb700' stroke-width='2'/%3E%3Crect x='38' y='10' width='2' height='28' fill='%23ffb700'/%3E%3Crect x='44' y='10' width='2' height='28' fill='%23ffb700'/%3E%3Crect x='50' y='10' width='2' height='28' fill='%23ffb700'/%3E%3C/svg%3E");
+        }
+        
+        .floating-elements::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3));
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-elements::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: 10%;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(59, 130, 246, 0.3));
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-x-hidden">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements fixed inset-0 pointer-events-none"></div>
+    
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-lg">
+            <!-- Header -->
+            <div class="text-center mb-8 animate-slide-up">
+                <h1 class="text-5xl font-black mb-4">
+                    <span class="gradient-text">Laptop</span>
+                    <span class="text-white">Predictor</span>
+                </h1>
+                <p class="text-blue-200 text-lg font-medium">AI-Powered Price Intelligence</p>
+            </div>
+            
+            <!-- Main Card -->
+            <div class="glass-effect rounded-3xl p-8 shadow-2xl animate-fade-in">
+                <!-- Currency Toggle -->
+                <div class="flex justify-center mb-6">
+                    <div class="glass-effect rounded-full p-1 flex items-center space-x-1">
+                        <button 
+                            id="euroCurrency" 
+                            class="currency-btn px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 bg-blue-600 text-white shadow-lg"
+                        >
+                            € EUR
+                        </button>
+                        <button 
+                            id="lkrCurrency" 
+                            class="currency-btn px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 text-blue-200 hover:text-white"
+                        >
+                            LKR
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Price Display -->
+                <div class="glass-effect rounded-2xl p-6 mb-8 text-center border-2 border-blue-400/30">
+                    <div class="text-blue-200 text-sm font-medium mb-2">Predicted Price</div>
+                    <div id="priceDisplay" class="text-3xl font-black text-white mb-2">
+                        € 0.00
+                    </div>
+                    <div id="convertedPrice" class="text-blue-300 text-sm font-medium hidden">
+                        ≈ LKR 0.00
+                    </div>
+                    <div class="text-xs text-blue-400 mt-2">
+                        Exchange rate updated: <span id="lastUpdated">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <form id="laptopForm" class="space-y-6">
+                    <!-- RAM & Weight Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="ram" class="block text-sm font-bold text-white">RAM (GB)</label>
+                            <input 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white placeholder-slate-400 focus:outline-none input-glow transition-all duration-300 font-medium" 
+                                type="number" 
+                                name="ram" 
+                                id="ram" 
+                                placeholder="8" 
+                                min="2" 
+                                max="64" 
+                                step="2" 
+                                required>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="weight" class="block text-sm font-bold text-white">Weight (kg)</label>
+                            <input 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white placeholder-slate-400 focus:outline-none input-glow transition-all duration-300 font-medium" 
+                                type="number" 
+                                name="weight" 
+                                id="weight" 
+                                placeholder="1.5" 
+                                min="0.5" 
+                                max="5" 
+                                step="0.01" 
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="space-y-2">
+                        <label for="company" class="block text-sm font-bold text-white">Brand</label>
+                        <select 
+                            name="company" 
+                            id="company" 
+                            class="w-full px-4 py-3 rounded-xl glass-effect text-white focus:outline-none input-glow transition-all duration-300 appearance-none cursor-pointer font-medium" 
+                            required>
+                            <option value="" selected hidden class="bg-slate-800">Select Brand</option>
+                            <option value="Apple" class="bg-slate-800">🍎 Apple</option>
+                            <option value="Dell" class="bg-slate-800">💻 Dell</option>
+                            <option value="HP" class="bg-slate-800">🖥️ HP</option>
+                            <option value="Lenovo" class="bg-slate-800">📱 Lenovo</option>
+                            <option value="Asus" class="bg-slate-800">⚡ Asus</option>
+                            <option value="Acer" class="bg-slate-800">🔧 Acer</option>
+                            <option value="MSI" class="bg-slate-800">🎮 MSI</option>
+                            <option value="Razer" class="bg-slate-800">🐍 Razer</option>
+                            <option value="Microsoft" class="bg-slate-800">🪟 Microsoft</option>
+                            <option value="Samsung" class="bg-slate-800">📱 Samsung</option>
+                            <option value="Huawei" class="bg-slate-800">📡 Huawei</option>
+                            <option value="LG" class="bg-slate-800">📺 LG</option>
+                            <option value="Toshiba" class="bg-slate-800">💿 Toshiba</option>
+                            <option value="Fujitsu" class="bg-slate-800">🏢 Fujitsu</option>
+                            <option value="Google" class="bg-slate-800">🔍 Google</option>
+                            <option value="Xiaomi" class="bg-slate-800">📱 Xiaomi</option>
+                            <option value="Chuwi" class="bg-slate-800">💻 Chuwi</option>
+                            <option value="Mediacom" class="bg-slate-800">📻 Mediacom</option>
+                            <option value="Vero" class="bg-slate-800">✅ Vero</option>
+                        </select>
+                    </div>
+
+                    <!-- Type & OS Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="typename" class="block text-sm font-bold text-white">Category</label>
+                            <select 
+                                name="typename" 
+                                id="typename" 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white focus:outline-none input-glow transition-all duration-300 appearance-none cursor-pointer font-medium" 
+                                required>
+                                <option value="" selected hidden class="bg-slate-800">Select Type</option>
+                                <option value="Gaming" class="bg-slate-800">🎮 Gaming</option>
+                                <option value="Ultrabook" class="bg-slate-800">⚡ Ultrabook</option>
+                                <option value="Notebook" class="bg-slate-800">📝 Notebook</option>
+                                <option value="2 in 1 Convertible" class="bg-slate-800">🔄 2-in-1</option>
+                                <option value="Workstation" class="bg-slate-800">🏭 Workstation</option>
+                                <option value="Netbook" class="bg-slate-800">🌐 Netbook</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="opsys" class="block text-sm font-bold text-white">OS</label>
+                            <select 
+                                name="opsys" 
+                                id="opsys" 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white focus:outline-none input-glow transition-all duration-300 appearance-none cursor-pointer font-medium" 
+                                required>
+                                <option value="" selected hidden class="bg-slate-800">Select OS</option>
+                                <option value="Windows" class="bg-slate-800">🪟 Windows</option>
+                                <option value="Mac" class="bg-slate-800">🍎 macOS</option>
+                                <option value="Linux" class="bg-slate-800">🐧 Linux</option>
+                                <option value="other" class="bg-slate-800">⚙️ Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CPU & GPU Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="cpuname" class="block text-sm font-bold text-white">Processor</label>
+                            <select 
+                                name="cpuname" 
+                                id="cpuname" 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white focus:outline-none input-glow transition-all duration-300 appearance-none cursor-pointer font-medium" 
+                                required>
+                                <option value="" selected hidden class="bg-slate-800">Select CPU</option>
+                                <option value="Intel Core i7" class="bg-slate-800">💎 Intel i7</option>
+                                <option value="Intel Core i5" class="bg-slate-800">⚡ Intel i5</option>
+                                <option value="Intel Core i3" class="bg-slate-800">🔧 Intel i3</option>
+                                <option value="AMD" class="bg-slate-800">🔥 AMD</option>
+                                <option value="other" class="bg-slate-800">⚙️ Other</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="gpuname" class="block text-sm font-bold text-white">Graphics</label>
+                            <select 
+                                name="gpuname" 
+                                id="gpuname" 
+                                class="w-full px-4 py-3 rounded-xl glass-effect text-white focus:outline-none input-glow transition-all duration-300 appearance-none cursor-pointer font-medium" 
+                                required>
+                                <option value="" selected hidden class="bg-slate-800">Select GPU</option>
+                                <option value="Nvidia" class="bg-slate-800">🎮 NVIDIA</option>
+                                <option value="AMD" class="bg-slate-800">🔥 AMD</option>
+                                <option value="Intel" class="bg-slate-800">💻 Intel</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="grid grid-cols-2 gap-6 py-4">
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input 
+                                type="checkbox" 
+                                name="touchscreen" 
+                                id="touchscreen" 
+                                class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-300">
+                            <span class="text-white font-semibold group-hover:text-blue-300 transition-colors duration-300">
+                                👆 Touchscreen
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input 
+                                type="checkbox" 
+                                name="ips" 
+                                id="ips" 
+                                class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-300">
+                            <span class="text-white font-semibold group-hover:text-blue-300 transition-colors duration-300">
+                                📺 IPS Display
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Predict Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl text-lg">
+                        🚀 Predict Price
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCurrency = 'EUR';
+        let exchangeRate = 330; // Default EUR to LKR rate
+        let lastPredictedEuroPrice = 0;
+
+        // Currency conversion functionality
+        async function updateExchangeRate() {
+            try {
+                // Simulate API call for demo - in real app, use actual exchange rate API
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/EUR');
+                const data = await response.json();
+                exchangeRate = data.rates.LKR || 330;
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+            } catch (error) {
+                // Fallback rate
+                exchangeRate = 330;
+                document.getElementById('lastUpdated').textContent = 'Using default rate';
+            }
+        }
+
+        function updatePriceDisplay() {
+            const priceDisplay = document.getElementById('priceDisplay');
+            const convertedPrice = document.getElementById('convertedPrice');
+            
+            if (currentCurrency === 'EUR') {
+                priceDisplay.textContent = `€ ${lastPredictedEuroPrice.toFixed(2)}`;
+                const lkrPrice = lastPredictedEuroPrice * exchangeRate;
+                convertedPrice.textContent = `≈ LKR ${lkrPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                convertedPrice.classList.remove('hidden');
+            } else {
+                const lkrPrice = lastPredictedEuroPrice * exchangeRate;
+                priceDisplay.textContent = `LKR ${lkrPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                convertedPrice.textContent = `≈ € ${lastPredictedEuroPrice.toFixed(2)}`;
+                convertedPrice.classList.remove('hidden');
+            }
+        }
+
+        // Currency toggle functionality
+        document.getElementById('euroCurrency').addEventListener('click', function() {
+            currentCurrency = 'EUR';
+            this.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            this.classList.remove('text-blue-200');
+            document.getElementById('lkrCurrency').classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+            document.getElementById('lkrCurrency').classList.add('text-blue-200');
+            updatePriceDisplay();
+        });
+
+        document.getElementById('lkrCurrency').addEventListener('click', function() {
+            currentCurrency = 'LKR';
+            this.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            this.classList.remove('text-blue-200');
+            document.getElementById('euroCurrency').classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+            document.getElementById('euroCurrency').classList.add('text-blue-200');
+            updatePriceDisplay();
+        });
+
+        // Simulate ML prediction (replace with actual model integration)
+        function predictPrice(formData) {
+            // This is a simplified prediction model - replace with your actual ML model
+            let basePrice = 500; // Base price in EUR
+            
+            // RAM factor
+            const ram = parseInt(formData.get('ram'));
+            basePrice += (ram - 4) * 50;
+            
+            // Weight factor (lighter = more expensive)
+            const weight = parseFloat(formData.get('weight'));
+            basePrice += (3 - weight) * 100;
+            
+            // Company factor
+            const companyMultipliers = {
+                'Apple': 1.8,
+                'Razer': 1.6,
+                'Microsoft': 1.4,
+                'Dell': 1.2,
+                'HP': 1.1,
+                'Lenovo': 1.0,
+                'Asus': 1.1,
+                'Acer': 0.9,
+                'MSI': 1.3
+            };
+            basePrice *= companyMultipliers[formData.get('company')] || 1.0;
+            
+            // Type factor
+            const typeMultipliers = {
+                'Gaming': 1.5,
+                'Workstation': 1.4,
+                'Ultrabook': 1.3,
+                '2 in 1 Convertible': 1.2,
+                'Notebook': 1.0,
+                'Netbook': 0.7
+            };
+            basePrice *= typeMultipliers[formData.get('typename')] || 1.0;
+            
+            // CPU factor
+            const cpuMultipliers = {
+                'Intel Core i7': 1.4,
+                'Intel Core i5': 1.2,
+                'Intel Core i3': 1.0,
+                'AMD': 1.1
+            };
+            basePrice *= cpuMultipliers[formData.get('cpuname')] || 1.0;
+            
+            // GPU factor
+            const gpuMultipliers = {
+                'Nvidia': 1.3,
+                'AMD': 1.1,
+                'Intel': 1.0
+            };
+            basePrice *= gpuMultipliers[formData.get('gpuname')] || 1.0;
+            
+            // Features
+            if (formData.get('touchscreen')) basePrice += 100;
+            if (formData.get('ips')) basePrice += 80;
+            
+            // OS factor
+            if (formData.get('opsys') === 'Mac') basePrice *= 1.3;
+            
+            return Math.max(200, basePrice + (Math.random() * 200 - 100)); // Add some randomness
+        }
+
+        // Form submission
+        document.getElementById('laptopForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const predictedPrice = predictPrice(formData);
+            
+            lastPredictedEuroPrice = predictedPrice;
+            updatePriceDisplay();
+            
+            // Add success animation
+            const priceDisplay = document.getElementById('priceDisplay').parentElement;
+            priceDisplay.classList.add('animate-pulse-slow');
+            setTimeout(() => {
+                priceDisplay.classList.remove('animate-pulse-slow');
+            }, 2000);
+        });
+
+        // Initialize
+        updateExchangeRate();
+        updatePriceDisplay();
+    </script>
+</body>
+</html>
