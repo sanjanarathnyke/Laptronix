@@ -70,5 +70,3 @@ This app uses **supervised learning** with a **Random Forest Regressor** to pred
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-**Made with ❤️ using Flask, scikit-learn,
